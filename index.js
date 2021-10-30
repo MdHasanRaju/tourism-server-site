@@ -22,6 +22,7 @@ async function run() {
     await client.connect();
     const database = client.db("tour_package_shop");
     const productCollection = database.collection("products");
+    const myCollection = database.collection("my_order");
     
     // GET ALL PRODUCTS API
     app.get('/products', async(req, res) => {
@@ -30,6 +31,34 @@ async function run() {
       res.send(products);
     })
 
+    // Add New Service
+    app.post('/addNewService', async(req, res) => {
+      const query = req.body;
+      const result = await productCollection.insertOne(query);
+      console.log(result)
+    })
+
+    // Add Order place
+    app.post('/addUserOrder', async(req, res) => {
+      const order = req.body;
+      console.log(order)
+      const result = await myCollection.insertOne(order);
+      console.log(result)
+      res.send(result)
+    })
+    
+    app.get("/my_order", async (req, res) => {
+      const cursor = myCollection.find({});
+      const myOrders = await cursor.toArray();
+      res.send(myOrders);
+    });
+
+     app.get("/ownOrder", async(req, res) => {
+       myCollection.find({ email: req.query.email }).toArray((err, items) => {
+           console.log("items", items);
+           res.send(items);
+         });
+     });
     
   } finally {
     // await client.close();
