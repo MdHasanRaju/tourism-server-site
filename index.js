@@ -1,5 +1,6 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const ObjectId = require("mongodb").ObjectId;
 const app = express();
 const cors = require('cors');
 require("dotenv").config();
@@ -35,7 +36,7 @@ async function run() {
     app.post('/addNewService', async(req, res) => {
       const query = req.body;
       const result = await productCollection.insertOne(query);
-      console.log(result)
+      res.send(result)
     })
 
     // Add Order place
@@ -52,12 +53,22 @@ async function run() {
       const myOrders = await cursor.toArray();
       res.send(myOrders);
     });
-
+    
      app.get("/ownOrder", async(req, res) => {
-       myCollection.find({ email: req.query.email }).toArray((err, items) => {
+       await myCollection.find({ email: req.query.email }).toArray((err, items) => {
            console.log("items", items);
            res.send(items);
          });
+     });
+
+    //  Deleted From My order Dashboard
+     app.delete("/deleteService/:id", async(req, res) =>{
+        const id = req.params.id;
+        const deletedItem = {_id: ObjectId(id)}
+        const result = await myCollection.deleteOne(deletedItem);
+        console.log(result);
+        res.send(result)
+
      });
     
   } finally {
